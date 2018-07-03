@@ -5,7 +5,7 @@
         <div class="col-md-8">
           <div class="row">
             <div class="col-md-3">
-              <h3>Playlistify</h3>
+              <h3>Multify</h3>
             </div>
             <div class="col-md-9" id="description">
               <p>Ever want to combine the sounds of two or more artists/songs? Use this to generate playlists based on
@@ -69,7 +69,8 @@
       </div>
       <div class="row" v-if="loading">
         <div class="col-md-12 center">
-          <img src="./assets/loading.gif" alt="Loading...">
+          <!-- <img src="./assets/loading.gif" alt="Loading..."> -->
+          <img src="src/assets/loading.gif"/>
         </div>
       </div>
       <my-playlists v-if="this.user != null" :playlist-list="this.userPlaylists" :user="true" @select-playlist="selectPlaylist"></my-playlists>
@@ -284,7 +285,7 @@ export default {
       const authEndpoint = "https://accounts.spotify.com/authorize";
       // Replace with your app's client ID, redirect URI and desired scopes
       const clientId = "cf6ae46384e94e3d8209dc29f0694ee0";
-      const redirectUri = "https://duke-compsci290-spring2018.github.io/final-project-team-1/spotiplay/";
+      const redirectUri = "https://namanagar.github.io/multify/";
       const scopes = [
         "user-top-read playlist-modify-private playlist-modify-public user-read-private user-read-email"
       ];
