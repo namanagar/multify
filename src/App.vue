@@ -13,12 +13,9 @@
             </div>
           </div>
         </div>
-        <div class="col-md-4" v-if="!loggedIn">
+        <div class="col-md-4" v-if="this.user == null">
           <div class="row">
             <button class="btn btn-success" @click="login">Log In</button>
-          </div>
-          <div class="row">
-            <small>Known bug - login will only work the second time you click. Sorry!</small>
           </div>
         </div>
         <div class="col-md-4" id="userdetails" v-if="this.user != null">
@@ -167,7 +164,6 @@ export default {
       numSongs: { number: 10 },
       playlist: null,
       user: null,
-      loggedIn: false,
       _token: "",
       view: "list",
       page: "home",
@@ -210,6 +206,65 @@ export default {
       });
       //return {user: this.user.email, playlist: toRet, name: this.playlistName};
       return toRet;
+    },
+    loggedIn: function(){
+      const hash = window.location.hash
+        .substring(1)
+        .split("&")
+        .reduce(function(initial, item) {
+          if (item) {
+            var parts = item.split("=");
+            initial[parts[0]] = decodeURIComponent(parts[1]);
+          }
+          return initial;
+        }, {});
+      this._token = hash.access_token;
+      const idk = hash.access_token;
+      var retVal = false;
+      axios
+        .get("https://api.spotify.com/v1/me", {
+          headers: {
+            Authorization: "Bearer " + this._token
+          }
+        })
+        .then(
+          response => {
+            this.user = response.data;
+            var userPref;
+            var m = this.user.email;
+            this.userPrefs.forEach(function(e) {
+              if (e.user === m) {
+                userPref = e;
+              }
+            });
+            this.userPref = userPref;
+            if (!this.userPref) {
+              this.userPref = {
+                dark: true,
+                explicit: true,
+                user: this.user.email
+              };
+              this.$firebaseRefs.userPrefs.push(userPref);
+            }
+            // this code has to be doubled here to make sure this.userPref is a firebase obj not a POJO
+            this.userPrefs.forEach(function(e) {
+              if (e.user === m) {
+                userPref = e;
+              }
+            });
+            this.dark = userPref.dark;
+            this.theme = this.dark ? 'dark' : 'light';
+            this.explicit = userPref.explicit;
+            this.userPref = userPref;
+            this._token = idk;
+            retVal = true;
+          },
+          error => {
+            console.log("error: " + error);
+            retVal = false;
+          }
+        );
+        return retVal;
     }
   },
   methods: {
@@ -279,13 +334,13 @@ export default {
           }
           return initial;
         }, {});
-      window.location.hash = "";
+      //window.location.hash = "";
       // Set token
       this._token = hash.access_token;
       const authEndpoint = "https://accounts.spotify.com/authorize";
       // Replace with your app's client ID, redirect URI and desired scopes
       const clientId = "cf6ae46384e94e3d8209dc29f0694ee0";
-      const redirectUri = "https://namanagar.github.io/multify/";
+      const redirectUri = "http://localhost:8080/";
       const scopes = [
         "user-top-read playlist-modify-private playlist-modify-public user-read-private user-read-email"
       ];
@@ -295,50 +350,6 @@ export default {
           "%20"
         )}&response_type=token&show_dialog=true`;
       }
-      this._token = hash.access_token;
-      const idk = hash.access_token;
-      this.loggedIn = true;
-      axios
-        .get("https://api.spotify.com/v1/me", {
-          headers: {
-            Authorization: "Bearer " + this._token
-          }
-        })
-        .then(
-          response => {
-            this.user = response.data;
-            var userPref;
-            var m = this.user.email;
-            this.userPrefs.forEach(function(e) {
-              if (e.user === m) {
-                userPref = e;
-              }
-            });
-            this.userPref = userPref;
-            if (!this.userPref) {
-              this.userPref = {
-                dark: true,
-                explicit: true,
-                user: this.user.email
-              };
-              this.$firebaseRefs.userPrefs.push(userPref);
-            }
-            // this code has to be doubled here to make sure this.userPref is a firebase obj not a POJO
-            this.userPrefs.forEach(function(e) {
-              if (e.user === m) {
-                userPref = e;
-              }
-            });
-            this.dark = userPref.dark;
-            this.theme = this.dark ? 'dark' : 'light';
-            this.explicit = userPref.explicit;
-            this.userPref = userPref;
-            this._token = idk;
-          },
-          error => {
-            console.log("error: " + error);
-          }
-        );
     },
     logout(){
       this.user = null;
@@ -346,7 +357,7 @@ export default {
       this.explicit = true;
       this.dark = true;
       this.theme = "dark";
-      this.loggedIn = false;
+      this._token = null;
     },
     async getArtists(artists) {
       var artistIDs = [];
