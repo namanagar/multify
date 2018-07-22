@@ -340,7 +340,7 @@ export default {
       const authEndpoint = "https://accounts.spotify.com/authorize";
       // Replace with your app's client ID, redirect URI and desired scopes
       const clientId = "cf6ae46384e94e3d8209dc29f0694ee0";
-      const redirectUri = "http://localhost:8080/";
+      const redirectUri = "https://namanagar.github.io/multify/";
       const scopes = [
         "user-top-read playlist-modify-private playlist-modify-public user-read-private user-read-email"
       ];
