@@ -56,7 +56,7 @@
               </select>
             </div>
             <label for="names">Names</label>
-            <input type="text" class="form-control" id="names" :disabled="!loggedIn" :placeholder="placeholder"
+            <input type="text" class="form-control" id="names" :disabled="this.user == null" :placeholder="placeholder"
                   v-model="input">
             <div class="input-group-append">
               <button class="btn btn-outline-success" type="button" @click="generate()">Go!</button>
